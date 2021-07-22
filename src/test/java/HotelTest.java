@@ -1,9 +1,12 @@
+import hotel.Booking;
 import hotel.Hotel;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import people.Guest;
 import rooms.Bedroom;
 import rooms.ConferenceRoom;
+import rooms.DiningRoom;
 import rooms.RoomType;
 
 import static org.junit.Assert.assertEquals;
@@ -19,6 +22,10 @@ public class HotelTest {
     ConferenceRoom conferenceRoom2;
     ConferenceRoom conferenceRoom3;
     Guest guest;
+    Booking testBooking;
+    DiningRoom diningRoom;
+    DiningRoom diningRoom2;
+
 
     @Before
     public void before(){
@@ -30,6 +37,10 @@ public class HotelTest {
         conferenceRoom3 = new ConferenceRoom(40,"Moore");
         hotel = new Hotel();
         guest = new Guest("Antonio");
+        testBooking = new Booking(bedroom2, 7);
+        diningRoom = new DiningRoom(50, "Big Toni's");
+        diningRoom2 = new DiningRoom(100, "Ramen it in your gob!");
+
     }
 
     @Test
@@ -49,7 +60,7 @@ public class HotelTest {
         hotel.addConferenceRoom(conferenceRoom);
         assertEquals(1, hotel.getNoOfConferenceRooms());
     }
-    
+
     @Test
     public void canCheckInGuestToBedroom(){
         hotel.checkInGuest(guest, bedroom);
@@ -60,5 +71,40 @@ public class HotelTest {
     public void canCheckInGuestToConferenceRoom(){
         hotel.checkInGuest(guest, conferenceRoom);
         assertEquals(1, conferenceRoom.getCurrentNoOfGuests());
+    }
+
+    @Test
+    public void canBookRoom(){
+        Booking booking = hotel.bookRoom(bedroom2, 7);
+        assertEquals(testBooking.getNoOfNights(), booking.getNoOfNights());
+        assertEquals(testBooking.getRoom(), booking.getRoom());
+    }
+
+    @Test
+    public void cannotBookRoomIfOccupied(){
+        hotel.bookRoom(bedroom, 7);
+        assertEquals(null, hotel.bookRoom(bedroom, 2));
+    }
+
+    @Test
+    public void canProduceBill(){
+        assertEquals(539, hotel.produceBill(testBooking), 0.01);
+    }
+
+    @Test
+    public void hotelHasDiningRooms(){
+        hotel.addDiningRoom(diningRoom);
+        hotel.addDiningRoom(diningRoom2);
+        DiningRoom actualDiningRoom = hotel.getDiningRooms().get("Ramen it in your gob!");
+        assertEquals(100, actualDiningRoom.getCapacity());
+    }
+
+    @Test
+    public void canGetVacantRooms(){
+        hotel.addBedroom(bedroom);
+        hotel.addBedroom(bedroom2);
+        hotel.addBedroom(bedroom3);
+        hotel.bookRoom(bedroom2, 7);
+        assertEquals(2, hotel.getVacantRooms(hotel.getBedrooms()).size());
     }
 }
